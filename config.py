@@ -3,10 +3,10 @@ IMAP_PORT = 993
 SMTP_SERVER = 'smtp.mail.ru'
 SMTP_PORT = 465
 
-LOGIN = 'checker18@mail.ru'
-PASSWORD = '87XZuQ2gCj'
+LOGIN = 'checker@example.com'
+PASSWORD = 'password'
 
-ADMINS = ['someuser18@mail.ru']
+ADMINS = ['admin@example.com']
 REPORT_TIME = '16:00'
 
 VERIFIER_UPDATE_PERIOD = 3.0  #sec

@@ -189,7 +189,7 @@ class App:
         msg.attach(part1)
         smtp.sendmail(self.user, receiver, msg.as_string())
         smtp.quit()
-        
+
     def run(self):
         conn = sqlite3.connect("database.db")
         cur = conn.cursor()
