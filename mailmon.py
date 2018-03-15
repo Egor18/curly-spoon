@@ -31,7 +31,7 @@ class Message:
 class MailMonitor:
     def __init__(self, server, port, user, password):
         self.solutions_dir = 'solutions'
-        self.tasks_dir = 'tasks'
+        self.tasks_dir = config.TASKS_DIR
         self.server = server
         self.port = port
         self.user = user
@@ -88,9 +88,9 @@ class MailMonitor:
                         data = part.get_payload(decode=True)
                         attachments.append(Attachment(filename, data))
         except:
-            return Message(sender, datetime, None, None, None)
+            return Message(sender, datetime, task, language, attachments)
         if task is None or language is None or not attachments:
-            return Message(sender, datetime, None, None, None)
+            return Message(sender, datetime, task, language, attachments)
         language_ok = False
         for lang in checker.RUN_COMMANDS:
             if lang.lower() == language.lower():
@@ -101,7 +101,7 @@ class MailMonitor:
                 attachments.remove(attachment)
         if task not in self.get_available_tasks() or \
            not language_ok or not attachments:
-            return Message(sender, datetime, None, None, None)
+            return Message(sender, datetime, task, language, attachments)
         return Message(sender, datetime, task, language, attachments)
 
     def get_new_messages(self):
@@ -124,7 +124,12 @@ class MailMonitor:
         conn = sqlite3.connect("database.db")
         cur = conn.cursor()
         for m in messages:
-            if not m.sender or not m.task or not m.language or not m.attachments:
+            if m.sender in config.BLACKLIST:
+                logging.info('Message from blacklisted sender: {0}. Ignoring.'.format(m.sender))
+                continue
+            if not m.sender or not m.task and not m.language:
+                status = Status.INVALID_SOLUTION_FORMAT_ERROR #totally incorrect, don't send response
+            elif not m.task or not m.language or not m.attachments:
                 status = Status.INVALID_SOLUTION_FORMAT_WAITING
             else:
                 status = Status.COPYING

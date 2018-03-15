@@ -6,8 +6,13 @@ SMTP_PORT = 465
 LOGIN = 'checker@example.com'
 PASSWORD = 'password'
 
+TASKS_DIR = '/path/to/tasks'
+REPORT_FILE = '/path/to/report.html'
+
 ADMINS = ['admin@example.com']
 REPORT_TIME = '16:00'
+
+BLACKLIST = []
 
 VERIFIER_UPDATE_PERIOD = 3.0  #sec
 MAILMON_UPDATE_PERIOD = 3.0   #sec

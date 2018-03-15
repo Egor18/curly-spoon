@@ -23,9 +23,9 @@ from status import Status
 class App:
     def __init__(self, server, port, user, password):
         self.solutions_dir = 'solutions'
-        self.tasks_dir = 'tasks'
+        self.tasks_dir = config.TASKS_DIR
         self.temp_dir = 'temp'
-        self.report_file = 'report.html'
+        self.report_file = config.REPORT_FILE
         self.server = server
         self.port = port
         self.user = user
@@ -235,7 +235,7 @@ class App:
                     try:
                         self.add_solution_to_report(email, datetime, task, language, new_status)
                     except:
-                        logging.warning('Unable to update report.html: ' + traceback.format_exc())
+                        logging.warning('Unable to update report file: ' + traceback.format_exc())
                     self.send_response(email, task, language, solution_id, new_status, compiler_output, failed_test_num)
                     logging.info('Checked solution: ' + str((solution_id, datetime, email,
                                                              task, language, Status.get_string(new_status))))
