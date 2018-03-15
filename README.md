@@ -3,6 +3,7 @@
 ### Prerequisites
 
 ```
+Lubuntu-16.04
 sudo apt install make cmake gcc g++ apparmor-utils python3-pip idle3
 sudo pip3 install psutil
 ```
