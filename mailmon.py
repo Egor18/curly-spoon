@@ -129,8 +129,10 @@ class MailMonitor:
                 continue
             if not m.sender or not m.task and not m.language:
                 status = Status.INVALID_SOLUTION_FORMAT_ERROR #totally incorrect, don't send response
+                m.task = m.language = None
             elif not m.task or not m.language or not m.attachments:
                 status = Status.INVALID_SOLUTION_FORMAT_WAITING
+                m.task = m.language = None
             else:
                 status = Status.COPYING
             cur.execute('INSERT INTO solutions (datetime, email, task, language, status) VALUES (?, ?, ?, ?, ?)',
