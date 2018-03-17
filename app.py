@@ -162,7 +162,7 @@ class App:
                 part1 = MIMEBase('application', "octet-stream")
                 part1.set_payload(open(self.report_file, "rb").read())
                 encoders.encode_base64(part1)
-                part1.add_header('Content-Disposition', 'attachment; filename="{0}"'.format(self.report_file))
+                part1.add_header('Content-Disposition', 'attachment; filename="report.html"')
                 msg.attach(part1)
                 smtp.sendmail(self.user, admin, msg.as_string())
                 smtp.quit()
