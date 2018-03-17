@@ -4,7 +4,7 @@
 
 ```
 Lubuntu-16.04
-sudo apt install make cmake gcc g++ apparmor-utils python3-pip idle3
+sudo apt install gcc g++ mono-devel apparmor-utils python3-pip idle3
 sudo pip3 install psutil
 ```
 

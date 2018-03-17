@@ -19,18 +19,21 @@ from status import Status
 #[[$SRC_FILES_RHEAD]]      --> c.cpp
 
 COMPILE_COMMANDS = {
-    'C++' : 'g++ [[$SRC_FILES... ]] -o [[$TARGET_PATH]] -std=c++14',
-    'C'   : 'gcc [[$SRC_FILES... ]] -o [[$TARGET_PATH]]',
+    'C++' : 'g++ [[$SRC_FILES... ]] -o [[$TARGET_PATH]] -std=c++14 -O2',
+    'C'   : 'gcc [[$SRC_FILES... ]] -o [[$TARGET_PATH]] -std=c11 -O2',
+    'C#'  : 'mcs [[$SRC_FILES... ]] -out:[[$TARGET_PATH]] -optimize',
 }
 
 EXTENSIONS = {
     'C++' : ('.cpp', '.hpp', '.cxx', '.hxx', '.c', '.h', ),
     'C'   : ('.c', '.h'),
+    'C#'  : ('.cs'),
 }
 
 RUN_COMMANDS = {
     'C++' : '[[$TARGET_PATH]]',
     'C'   : '[[$TARGET_PATH]]',
+    'C#'  : '[[$TARGET_PATH]]',
 }
 
 APPARMOR_PROFILES = {
@@ -46,6 +49,19 @@ APPARMOR_PROFILES = {
 #include <tunables/global>
 [[$TARGET_PATH]] {
     #include <abstractions/base>
+    [[$TARGET_PATH]] mr,
+}
+''',
+
+    'C#' : '''
+#include <tunables/global>
+[[$TARGET_PATH]] {
+    #include <abstractions/base>
+    /etc/mono/config r,
+    /usr/bin/mono-sgen mrix,
+    /usr/lib{,32,64}/** mrix,
+    /var/lib/binfmts/ r,
+    /var/lib/binfmts/** r,
     [[$TARGET_PATH]] mr,
 }
 ''',
@@ -114,7 +130,7 @@ class Checker:
 
     def compile_solution(self):
         cmd = self.replace_vars(COMPILE_COMMANDS[self.language])
-        with open(self.temp_dir + '/compiler_output.txt', 'w') as outfile:
+        with open(self.temp_dir + '/compiler_output', 'w') as outfile:
             process = psutil.Popen(shlex.split(cmd), stdout=outfile, stderr=outfile)
             try:
                 code = process.wait(timeout=config.COMPILATION_TIME_LIMIT)
@@ -148,11 +164,12 @@ class Checker:
         time_limit_exceeded = False
         mem_limit_exceeded = False
         output_path = self.temp_dir + '/output'
+        stderr_path = self.temp_dir + '/stderr'
         name, ext = os.path.splitext(input_path)
         etalon_path = name + '.out'
-        with open(output_path, 'w') as output_file, open(input_path, 'r') as input_file:
+        with open(output_path, 'w') as output_file, open(input_path, 'r') as input_file, open(stderr_path, 'w') as stderr_file:
             cmd = self.replace_vars(RUN_COMMANDS[self.language])
-            process = psutil.Popen(shlex.split(cmd), stdout=output_file, stdin=input_file)
+            process = psutil.Popen(shlex.split(cmd), stdout=output_file, stdin=input_file, stderr=stderr_file)
             start_time = time.time()
             step = 0.001
             code = -1
@@ -199,9 +216,18 @@ class Checker:
     def get_failed_test_num(self):
         return self.failed_test_num
 
+    def get_stderr(self):
+        try:
+            file = open(self.temp_dir + '/stderr', 'r')
+            stderr = file.read()
+            file.close()
+            return stderr
+        except:
+            return ''
+
     def get_compiler_output(self):
         try:
-            file = open(self.temp_dir + '/compiler_output.txt', 'r')
+            file = open(self.temp_dir + '/compiler_output', 'r')
             compiler_output = file.read()
             file.close()
             return compiler_output

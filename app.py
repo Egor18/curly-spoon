@@ -169,7 +169,7 @@ class App:
             os.remove(self.report_file)
             self.try_create_report_file()
 
-    def send_response(self, receiver, task, language, solution_id, new_status, compiler_output, failed_test_num):
+    def send_response(self, receiver, task, language, solution_id, new_status, compiler_output, failed_test_num, stderr):
         smtp = smtplib.SMTP_SSL(self.server, self.port)
         smtp.login(self.user, self.password)
         msg = MIMEMultipart('alternative')
@@ -181,10 +181,17 @@ class App:
             message += 'Language: {0}\n'.format(language)
         message += 'Solution Id: {0}\n'.format(solution_id)
         message += '>>> Result: {0} <<<\n'.format(Status.get_string(new_status))
-        if failed_test_num != -1 and new_status == Status.WRONG_ANSWER:
+        fails = (Status.WRONG_ANSWER,
+                 Status.RUNTIME_ERROR,
+                 Status.SECURITY_VIOLATION_ERROR,
+                 Status.TIME_LIMIT_EXCEEDED,
+                 Status.MEMORY_LIMIT_EXCEEDED)
+        if failed_test_num != -1 and new_status in fails:
             message += 'Failed test: {0}\n'.format(failed_test_num)
+            if stderr:
+                message += 'Stderr:\n{0}'.format(stderr.lstrip())
         if compiler_output and new_status == Status.COMPILATION_ERROR:
-            message += 'Compiler output:\n{0}'.format(compiler_output)
+            message += 'Compiler output:\n{0}'.format(compiler_output.lstrip())
         part1 = MIMEText(message, 'plain', 'utf-8')
         msg.attach(part1)
         smtp.sendmail(self.user, receiver, msg.as_string())
@@ -198,6 +205,7 @@ class App:
         while True:
             compiler_output = ''
             failed_test_num = -1
+            stderr = ''
             next_solution = cur.execute('SELECT * FROM solutions WHERE status = ? OR status = ? ORDER BY id LIMIT 1',
                                         (Status.WAITING, Status.INVALID_SOLUTION_FORMAT_WAITING)).fetchone()
             if next_solution != None:
@@ -225,6 +233,7 @@ class App:
                             new_status = c.check()
                             compiler_output = c.get_compiler_output()
                             failed_test_num = c.get_failed_test_num()
+                            stderr = c.get_stderr()
                         except Exception as e:
                             logging.warning('Internal error: ' + traceback.format_exc())
                             new_status = Status.INTERNAL_ERROR
@@ -236,7 +245,7 @@ class App:
                         self.add_solution_to_report(email, datetime, task, language, new_status)
                     except:
                         logging.warning('Unable to update report file: ' + traceback.format_exc())
-                    self.send_response(email, task, language, solution_id, new_status, compiler_output, failed_test_num)
+                    self.send_response(email, task, language, solution_id, new_status, compiler_output, failed_test_num, stderr)
                     logging.info('Checked solution: ' + str((solution_id, datetime, email,
                                                              task, language, Status.get_string(new_status))))
                 except:
