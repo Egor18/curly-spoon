@@ -30,6 +30,10 @@ class App:
         self.port = port
         self.user = user
         self.password = password
+        if not os.path.exists(self.solutions_dir):
+            os.makedirs(self.solutions_dir)
+        if not os.path.exists(self.temp_dir):
+            os.makedirs(self.temp_dir)
 
     def get_available_tasks(self):
         return os.listdir(self.tasks_dir)
@@ -54,7 +58,7 @@ class App:
                 shutil.rmtree(self.solutions_dir)
             except:
                 pass
-            os.mkdir(self.solutions_dir)
+            os.makedirs(self.solutions_dir)
 
     def try_create_report_file(self):
         if not os.path.exists(self.report_file):

@@ -238,8 +238,11 @@ class Checker:
         if os.getuid() != 0:
             print('You should run checker with sudo privileges!')
             sys.exit(1)
-        shutil.rmtree(self.temp_dir)
-        os.mkdir(self.temp_dir)
+        try:
+            shutil.rmtree(self.temp_dir)
+        except:
+            pass
+        os.makedirs(self.temp_dir)
         compilation_result = self.compile_solution()
         if compilation_result != Status.OK:
             return compilation_result
