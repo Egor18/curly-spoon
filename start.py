@@ -12,6 +12,7 @@ try:
 except OSError:
     pass
 
+print()
 p1 = subprocess.Popen(['python3', 'app.py'])
 print('Verifier started.')
 time.sleep(0.5)
