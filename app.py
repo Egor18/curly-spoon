@@ -50,7 +50,10 @@ class App:
         res = cur.execute("SELECT count(*) FROM solutions")
         size = res.fetchone()[0]
         if size == 0:
-            shutil.rmtree(self.solutions_dir)
+            try:
+                shutil.rmtree(self.solutions_dir)
+            except:
+                pass
             os.mkdir(self.solutions_dir)
 
     def try_create_report_file(self):
