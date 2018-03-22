@@ -187,7 +187,7 @@ class App:
         if language:
             message += 'Language: {0}\n'.format(language)
         message += 'Solution Id: {0}\n'.format(solution_id)
-        message += '>>> Result: {0} <<<\n'.format(Status.get_string(new_status))
+        message += '### Result: {0} ###\n'.format(Status.get_string(new_status))
         fails = (Status.WRONG_ANSWER,
                  Status.RUNTIME_ERROR,
                  Status.SECURITY_VIOLATION_ERROR,

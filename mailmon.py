@@ -78,9 +78,6 @@ class MailMonitor:
                     if task is None or language is None:
                         task = self.find_value(text, 'task')
                         language = self.find_value(text, 'language')
-                        print('text:', text)
-                        print('task:', task)
-                        print('language:', language)
                 elif part.get('Content-Disposition') is not None:
                     filename = None
                     data = None
