@@ -73,20 +73,21 @@ class MailMonitor:
         attachments = []
         try:
             for part in message.walk():
-                if part.get_content_maintype() == 'text':
+                if part.get_content_maintype() == 'text' and part.get('Content-Disposition') is None:
                     text = part.get_payload(decode=True).decode('utf-8')
                     if task is None or language is None:
                         task = self.find_value(text, 'task')
                         language = self.find_value(text, 'language')
-                elif part.get_content_maintype() == 'application' and part.get('Content-Disposition') is not None:
+                elif part.get('Content-Disposition') is not None:
                     filename = None
                     data = None
                     header = email.header.decode_header(part.get_filename())
                     encoding = header[0][1]
+                    filename = header[0][0]
                     if encoding is not None:
-                        filename = header[0][0].decode(encoding)
-                        data = part.get_payload(decode=True)
-                        attachments.append(Attachment(filename, data))
+                        filename = filename.decode(encoding)
+                    data = part.get_payload(decode=True)
+                    attachments.append(Attachment(filename, data))
         except:
             return Message(sender, datetime, task, language, attachments)
         if task is None or language is None or not attachments:
@@ -128,7 +129,8 @@ class MailMonitor:
                 logging.info('Message from blacklisted sender: {0}. Ignoring.'.format(m.sender))
                 continue
             if not m.sender or not m.task and not m.language:
-                status = Status.INVALID_SOLUTION_FORMAT_ERROR #totally incorrect, don't send response
+                #totally incorrect, don't send response
+                status = Status.INVALID_SOLUTION_FORMAT_ERROR
                 m.task = m.language = None
             elif not m.task or not m.language or not m.attachments:
                 status = Status.INVALID_SOLUTION_FORMAT_WAITING
