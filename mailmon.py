@@ -47,7 +47,7 @@ class MailMonitor:
         return conn
 
     def find_value(self, text, value):
-        regex = '{0}\s*?=\s*?(\S+)'.format(re.escape(value))
+        regex = '{0}\s*?=\s*?([^<>\s]+)'.format(re.escape(value))
         res = re.findall(regex, text, re.DOTALL | re.IGNORECASE)
         if len(res) == 0:
             return None
@@ -78,6 +78,9 @@ class MailMonitor:
                     if task is None or language is None:
                         task = self.find_value(text, 'task')
                         language = self.find_value(text, 'language')
+                        print('text:', text)
+                        print('task:', task)
+                        print('language:', language)
                 elif part.get('Content-Disposition') is not None:
                     filename = None
                     data = None
