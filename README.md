@@ -12,7 +12,8 @@ sudo pip3 install psutil
 
 ```
 cd verifier
-sudo python3 start.py
+bash
+sudo ./start.sh
 ```
 
 ### License
